@@ -6,6 +6,26 @@ public class DataStore {
     private final ConcurrentHashMap<String, Object> store = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> expireTimes = new ConcurrentHashMap<>();
 
+    // Getter để PersistenceManager lấy dữ liệu
+    public ConcurrentHashMap<String, Object> getStore() {
+        return store;
+    }
+
+    public ConcurrentHashMap<String, Long> getExpireTimes() {
+        return expireTimes;
+    }
+
+    // Setter để PersistenceManager nạp dữ liệu
+    public void setStore(ConcurrentHashMap<String, Object> store) {
+        this.store.clear();
+        this.store.putAll(store);
+    }
+
+    public void setExpireTimes(ConcurrentHashMap<String, Long> expireTimes) {
+        this.expireTimes.clear();
+        this.expireTimes.putAll(expireTimes);
+    }
+
     public DataStore() {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(this::cleanExpiredKeys, 1, 1, TimeUnit.SECONDS);
@@ -27,7 +47,8 @@ public class DataStore {
     }
 
     public String get(String key) {
-        if (isExpired(key)) return null;
+        if (isExpired(key))
+            return null;
         Object value = store.get(key);
         return value instanceof String ? (String) value : null;
     }
@@ -45,7 +66,8 @@ public class DataStore {
     }
 
     public String hget(String key, String field) {
-        if (isExpired(key)) return null;
+        if (isExpired(key))
+            return null;
         ConcurrentHashMap<String, String> hash = (ConcurrentHashMap<String, String>) store.get(key);
         if (hash != null) {
             return hash.get(field);
@@ -68,7 +90,8 @@ public class DataStore {
     }
 
     public String lpop(String key) {
-        if (isExpired(key)) return null;
+        if (isExpired(key))
+            return null;
         ConcurrentLinkedDeque<String> list = (ConcurrentLinkedDeque<String>) store.get(key);
         if (list != null) {
             return list.pollFirst();
@@ -77,7 +100,8 @@ public class DataStore {
     }
 
     public String rpop(String key) {
-        if (isExpired(key)) return null;
+        if (isExpired(key))
+            return null;
         ConcurrentLinkedDeque<String> list = (ConcurrentLinkedDeque<String>) store.get(key);
         if (list != null) {
             return list.pollLast();
@@ -92,16 +116,19 @@ public class DataStore {
     }
 
     public long ttl(String key) {
-        if (!store.containsKey(key)) return -2;
+        if (!store.containsKey(key))
+            return -2;
         Long expireTime = expireTimes.get(key);
-        if (expireTime == null) return -1;
+        if (expireTime == null)
+            return -1;
         long ttlMillis = expireTime - System.currentTimeMillis();
         return ttlMillis > 0 ? ttlMillis / 1000 : -2;
     }
 
     private boolean isExpired(String key) {
         Long expireTime = expireTimes.get(key);
-        if (expireTime == null) return false;
+        if (expireTime == null)
+            return false;
         if (expireTime < System.currentTimeMillis()) {
             store.remove(key);
             expireTimes.remove(key);
