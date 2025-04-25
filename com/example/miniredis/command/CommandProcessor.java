@@ -39,6 +39,15 @@ public class CommandProcessor {
                     return dataStore.lpop(parts[1]);
                 case "RPOP":
                     return dataStore.rpop(parts[1]);
+                case "EXPIRE":
+                    dataStore.expire(parts[1], Integer.parseInt(parts[2]));
+                    return "OK";
+                case "TTL":
+                    return String.valueOf(dataStore.ttl(parts[1]));
+                case "SETX":
+                    dataStore.set(parts[1], parts[3]);
+                    dataStore.expire(parts[1], Integer.parseInt(parts[2]));
+                    return "OK";
                 default:
                     return "Unknown command";
             }
@@ -46,4 +55,4 @@ public class CommandProcessor {
             return "Error: " + e.getMessage();
         }
     }
-}
+} 

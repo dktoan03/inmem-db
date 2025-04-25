@@ -10,16 +10,17 @@ public class RedisClient {
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(HOST, PORT);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-             Scanner scanner = new Scanner(System.in)) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                Scanner scanner = new Scanner(System.in)) {
 
             System.out.println(in.readLine());
 
             while (true) {
                 System.out.print("> ");
                 String command = scanner.nextLine();
-                if (command.equalsIgnoreCase("exit")) break;
+                if (command.equalsIgnoreCase("exit"))
+                    break;
 
                 out.write(command + "\n");
                 out.flush();
