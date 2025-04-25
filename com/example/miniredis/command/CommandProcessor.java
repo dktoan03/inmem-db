@@ -1,3 +1,6 @@
+package com.example.miniredis.command;
+
+import com.example.miniredis.datastore.DataStore;
 
 public class CommandProcessor {
     private final DataStore dataStore;
