@@ -3,17 +3,22 @@ package com.example.miniredis.server;
 import com.example.miniredis.command.CommandProcessor;
 import com.example.miniredis.datastore.DataStore;
 import com.example.miniredis.persistence.PersistenceManager;
+import com.example.miniredis.pubsub.PubSubManager;
 
 import java.io.*;
-import java.net.*;
-import java.util.concurrent.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private static final int PORT = 6379;
     private final DataStore dataStore = new DataStore();
-    private final CommandProcessor processor = new CommandProcessor(dataStore);
+    private final PersistenceManager persistenceManager = new PersistenceManager(dataStore);
+    private final PubSubManager pubSubManager = new PubSubManager();
+    private final CommandProcessor processor = new CommandProcessor(dataStore, pubSubManager);
     private final ExecutorService clientPool = Executors.newCachedThreadPool();
-    PersistenceManager persistenceManager = new PersistenceManager(dataStore);
 
     public void start() {
         persistenceManager.loadSnapshot();
@@ -37,9 +42,8 @@ public class Server {
             out.flush();
             String line;
             while ((line = in.readLine()) != null) {
-                if (line.equalsIgnoreCase("exit"))
-                    break;
-                String response = processor.process(line);
+                String[] parts = line.trim().split("\\s+");
+                String response = processor.process(parts, out);
                 out.write(response + "\n");
                 out.flush();
             }
@@ -57,5 +61,4 @@ public class Server {
     public static void main(String[] args) {
         new Server().start();
     }
-
 }
